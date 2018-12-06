@@ -35,4 +35,24 @@ else:
 print(his)
 
 
+# 使用循环来在网页间爬虫
+# his是一个栈，用记录浏览过的网页，这里给定一个初始网页
+his = ["/item/%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB/5162711"]
+for i in range(20):
+    url = base_url + his[-1]    # url是his的最后一个网页，就是当前网页
+    html = urlopen(url).read().decode('utf-8')   # 打开网页并用utf-8解码
+    soup = BeautifulSoup(html, features='html.parser')  # 根据规则把当前网页包装成soup对象
+    print(i,soup.find('h1').get_text(),' url:',his[-1]) # 打印当前轮数，当前网页的标题，当前网页网址
+    # 找当前网页的子链接
+    sub_urls = soup.find_all("a",
+                             {
+                                 "target":"_blank",
+                                 "href":re.compile("/item/(%.{2})+$")
+                             })
+    if len(sub_urls) != 0:
+        # 如果当前页面的子链接不为空，从过滤后的网页中随机选一个当做下一个要爬的网页
+        his.append(random.sample(sub_urls,1)[0]['href'])
+    else:
+        # 否则把当前网页出栈，到下一个网页里爬虫
+        his.pop()
 
